@@ -13,15 +13,15 @@ const IntroductionPage = () => {
     const [loading, setLoading] = useState(false);
     const [doneGeneratingDraft, setDoneGeneratingDraft] = useState(false);
 
-    const [tempOutline, setTempOutline] = useState<string[]>([]);
-    const [tempDraft, setTempDraft] = useState<string[]>([]);
+    // const [tempOutline, setTempOutline] = useState<string[]>([]);
+    // const [tempDraft, setTempDraft] = useState<string[]>([]);
 
-    useEffect(() => {
-        setIntroductionDrafts(tempDraft);
-    }, tempDraft)
-    useEffect(() => {
-        setTempOutline(tempOutline);
-    }, tempOutline)
+    // useEffect(() => {
+    //     setIntroductionDrafts(tempDraft);
+    // }, tempDraft)
+    // useEffect(() => {
+    //     setTempOutline(tempOutline);
+    // }, tempOutline)
 
     const addOutlineItem = () => {
         if (newOutlineItem.trim() !== '') {
@@ -132,6 +132,7 @@ const IntroductionPage = () => {
                                 ),
                                 actions: [
                                     <Button
+                                        key={index}
                                         type="link"
                                         className="text-red-500"
                                         onClick={() => removeOutlineItem(index)}

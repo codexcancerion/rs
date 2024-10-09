@@ -13,7 +13,7 @@ const ObjectivesPage = () => {
     const [finalQuestions, setFinalQuestions] = useState<string[]>([]);
     const [loadingObjectives, setLoadingObjectives] = useState<boolean>(false);
     const [loadingQuestions, setLoadingQuestions] = useState<boolean>(false);
-    const [doneObjectives, setDoneObjectives] = useState<boolean>(false);
+    // const [doneObjectives, setDoneObjectives] = useState<boolean>(false);
     const [savedObjectives, setSavedObjectives] = useState<boolean>(false);
     const [savedQuestions, setSavedQuestions] = useState<boolean>(false);
 

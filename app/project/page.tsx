@@ -1,7 +1,7 @@
 "use client"
 // app/project/page.tsx
 import React from 'react';
-import { Layout, Menu } from 'antd';
+import { Layout } from 'antd';
 import { useRouter } from 'next/navigation';
 
 const { Content } = Layout;
@@ -10,9 +10,6 @@ const { Content } = Layout;
 const ProjectPage: React.FC = () => {
   const router = useRouter();
 
-  const handleMenuClick = ({ key }: { key: string }) => {
-    router.push(`/project/${key}`);
-  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

@@ -14,7 +14,7 @@ const steps = [
   { key: 'project/literature-review', label: 'Literature Review' },
 ];
 
-const CustomLayout: React.FC = ({ children }: any) => {
+const CustomLayout: React.FC<React.PropsWithChildren<{}>> = ({ children }: React.PropsWithChildren<{}>) => {
   const router = useRouter();
 
   const handleMenuClick = ({ key }: { key: string }) => {

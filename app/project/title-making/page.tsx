@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Form, Input, Button, Select, List, Card, message, Collapse } from 'antd';
+import { Form, Input, Button, List, Card, message } from 'antd';
 import axios from 'axios';
 
 const { TextArea } = Input;
-const { Option } = Select;
 
 interface TitleReqs {
   id: number;
@@ -23,7 +22,7 @@ const TitleMakingPage = () => {
   const [doneSuggestion, setDoneSuggestion] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null); // To store the analysis result
-  const [doneAnalysis, setDoneAnalysis] = useState(false);
+  // const [doneAnalysis, setDoneAnalysis] = useState(false);
   const [titleReqs, setTitleReqs] = useState<TitleReqs>({
     id: 0,
     topicDescription: "",
@@ -75,7 +74,7 @@ const TitleMakingPage = () => {
       console.log(response);
       console.log("ANALYSIS: " + response.data.analysis);
       setAnalysis(response.data.analysis);
-      setDoneAnalysis(true);
+      // setDoneAnalysis(true);
     } catch (error) {
       console.error('Error generating title analysis:', error);
       message.error('Failed to generate title analysis. Please try again.');
