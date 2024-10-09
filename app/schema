@@ -1,0 +1,26 @@
+project
+    -Title
+        -title
+        -analysis
+        -titleReqs
+    -Objectives[]
+        -objective
+    -Questions[]
+        -question<string>
+        -analysis<string>
+    -Introduction
+        -outline[]
+            -description
+            -prompt
+            -referenceLink
+    -Methodology
+        -outline[]
+            -description
+            -prompt
+            -referenceLink
+    -Literature Review
+        -objective[]
+            -outline[]
+                -description
+                -prompt
+                -referenceLink

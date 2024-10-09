@@ -1,89 +1,117 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, List, Card, message } from 'antd';
+import { Outline } from '@/app/lib/interfaces';
 
 const { TextArea } = Input;
 
+// TO SAVE
+// introductionDrafts
+
 const IntroductionPage = () => {
-    const [outlineItems, setOutlineItems] = useState<string[]>([]);
+    // const [outlineItems, setOutlineItems] = useState<string[]>([]);
     const [soloOutline, setSoloOutline] = useState<string>('');
     const [newOutlineItem, setNewOutlineItem] = useState<string>('');
-    const [introductionDrafts, setIntroductionDrafts] = useState<string[]>([]);
+
+    const [introductionDrafts, setIntroductionDrafts] = useState<Outline[]>([]);
+    // let introductionDrafts: Outline[] = [];
+    // function setIntroductionDrafts(draft: Outline[]){
+    //     introductionDrafts = draft;
+    // }
+
     const [loading, setLoading] = useState(false);
     const [doneGeneratingDraft, setDoneGeneratingDraft] = useState(false);
 
-    // const [tempOutline, setTempOutline] = useState<string[]>([]);
-    // const [tempDraft, setTempDraft] = useState<string[]>([]);
-
-    // useEffect(() => {
-    //     setIntroductionDrafts(tempDraft);
-    // }, tempDraft)
-    // useEffect(() => {
-    //     setTempOutline(tempOutline);
-    // }, tempOutline)
+    useEffect(() => {
+        console.log(introductionDrafts)
+    }, introductionDrafts)
 
     const addOutlineItem = () => {
         if (newOutlineItem.trim() !== '') {
-            setOutlineItems([...outlineItems, newOutlineItem]);
+            const newDraft = {
+                id: introductionDrafts.length + 1,
+                description: [""],
+                prompt: newOutlineItem,
+                referenceLinks: [""]
+            };
+
+            console.log(newDraft);
+            // introductionDrafts.length === 0 ? setIntroductionDrafts([newDraft]) : setIntroductionDrafts([...introductionDrafts, newDraft]);
+
+            introductionDrafts.push(newDraft);
             setNewOutlineItem('');
+            console.log(introductionDrafts)
         } else {
             message.warning("Outline item can't be empty");
         }
     };
 
     const removeOutlineItem = (index: number) => {
-        const updatedItems = outlineItems.filter((_, idx) => idx !== index);
-        setOutlineItems(updatedItems);
+        const updatedItems = introductionDrafts.filter((_, idx) => idx !== index);
+        setIntroductionDrafts(updatedItems);
     };
 
     const generateIntroductionDrafts = () => {
         setLoading(true);
 
-        // Simulate API request for generating introduction drafts based on title, objectives, and outline.
-        setTimeout(() => {
-            const drafts = outlineItems.map(
-                (item, index) => `Section ${index + 1}: Introduction based on "${item}"`
-            );
-            setIntroductionDrafts(drafts);
-            setDoneGeneratingDraft(true);
-            setLoading(false);
-        }, 1000);
+        const introductionDraftsMutation = introductionDrafts
+
+        introductionDrafts.map((item, index) => {
+            const newOutlineDraft = {
+                description: ["call axios here"],
+                referenceLinks: ["sample.com"]
+            };
+
+            introductionDraftsMutation[index].description = newOutlineDraft.description;
+            introductionDraftsMutation[index].referenceLinks = newOutlineDraft.referenceLinks;
+        })
+
+        setIntroductionDrafts(introductionDraftsMutation);
+        setDoneGeneratingDraft(true);
+        setLoading(false);
     };
+
 
     const generateOneDraft = (i: number) => {
         setLoading(true);
 
         // Simulate API request for generating introduction drafts based on title, objectives, and outline.
-        setTimeout(() => {
-            const result = `New Section: Introduction based on "${soloOutline}"`;
+        const result = {
+            description: ["inserted call axios here", "inserted call axios here"],
+            referenceLinks: ["inserted.com"]
+        };
 
-            const draftUpdate = [
-                ...introductionDrafts.slice(0, i + 1),
-                result,
-                ...introductionDrafts.slice(i + 1),
-            ];
+        const oneDraft = {
+            id: i + 1,
+            prompt: soloOutline,
+            description: result.description,
+            referenceLinks: result.referenceLinks
+        }
 
-            const outlineUpdate = [
-                ...outlineItems.slice(0, i + 1),
-                soloOutline,
-                ...outlineItems.slice(i + 1),
-            ];
+        const draftUpdate = [
+            ...introductionDrafts.slice(0, i + 1),
+            oneDraft,
+            ...introductionDrafts.slice(i + 1),
+        ];
 
-            console.log(draftUpdate);
-            console.log(outlineUpdate);
+        console.log(draftUpdate);
 
-            setIntroductionDrafts(draftUpdate);
-            setOutlineItems(outlineUpdate);
+        setIntroductionDrafts(draftUpdate);
 
+        console.log(introductionDrafts);
 
-            console.log(introductionDrafts);
-            console.log(outlineItems);
-
-            setDoneGeneratingDraft(true);
-            setLoading(false);
-        }, 1000);
+        setDoneGeneratingDraft(true);
+        setLoading(false);
     };
+
+    const handleRemoveDraft = (index: number) => {
+        const tempDraft = introductionDrafts;
+        tempDraft.splice(index, 1);
+        setIntroductionDrafts(tempDraft);
+
+        console.log("REMOVE DRAFT: " + introductionDrafts)
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -120,14 +148,14 @@ const IntroductionPage = () => {
                     </Form.Item>
 
                     {/* Display the outline items */}
-                    {outlineItems.length > 0 && (
+                    {introductionDrafts.length > 0 && (
                         <List
                             className="mt-4"
-                            dataSource={outlineItems.map((item, index) => ({
+                            dataSource={introductionDrafts.map((item, index) => ({
                                 key: index,
                                 content: (
                                     <Card className="border border-gray-300 rounded-lg w-full">
-                                        {`Outline ${index + 1}: ${item}`}
+                                        {`Outline ${index + 1}: ${item.prompt}`}
                                     </Card>
                                 ),
                                 actions: [
@@ -174,47 +202,56 @@ const IntroductionPage = () => {
             )}
 
             {/* Display Generated Drafts */}
-            {introductionDrafts.length > 0 && (
+            {introductionDrafts.length > 0 && doneGeneratingDraft && (
                 <div className="mt-8">
                     <h3 className="text-xl font-semibold">Generated Introduction Drafts</h3>
-                    <List
-                        className="mt-4"
-                        dataSource={introductionDrafts.map((draft, index) => ({
-                            key: index,
-                            content: (
-                                <div className="flex flex-col w-full">
-                                    <Card className="border border-gray-300 rounded-lg shadow-sm w-full mb-4">
-                                        <p className="font-grey-500">Outline: {outlineItems[index]}</p>
-                                        <TextArea
-                                            rows={3}
-                                            defaultValue={draft}
-                                            className="border border-gray-300 rounded-lg mt-2"
-                                        />
-                                    </Card>
-                                    <Form layout="horizontal" className="space-y-6">
-                                        <Form.Item label="Insert here" layout="horizontal">
-                                            <Input
-                                                placeholder="Add an outline item"
-                                                onChange={(e) => {
-                                                    setSoloOutline(e.target.value);
-                                                }}
-                                                className="border border-gray-300 rounded-lg"
+                    {introductionDrafts.map((draft, index) => {
+                        return (
+                            <div key={index} className="flex flex-col w-full">
+                                <Card className="border border-gray-300 rounded-lg shadow-sm w-full mb-4">
+                                    <p className="font-grey-500">Outline: {draft.prompt}</p>
+                                    {draft.description.map((desc, idx) => {
+                                        return (                                            
+                                            <TextArea
+                                                key={idx}
+                                                rows={3}
+                                                defaultValue={desc}
+                                                className="border border-gray-300 rounded-lg mt-2"
                                             />
-                                            <Button
-                                                onClick={() => generateOneDraft(index)}
-                                                type="primary"
-                                                className="mt-2 bg-blue-500 hover:bg-blue-600"
-                                                loading={loading}
-                                            >
-                                                Add Outline Item
-                                            </Button>
-                                        </Form.Item>
-                                    </Form>
-                                </div>
-                            )
-                        }))}
-                        renderItem={(item) => <List.Item>{item.content}</List.Item>}
-                    />
+                                        )
+                                    })}
+                                    
+                                    <Button
+                                            onClick={() => handleRemoveDraft(index)}
+                                            type="primary"
+                                            className="mt-2 bg-red-500 hover:bg-red-600"
+                                            loading={loading}
+                                        >
+                                            Remove
+                                        </Button>
+                                </Card>
+                                <Form layout="horizontal" className="space-y-6">
+                                    <Form.Item label="Insert here" layout="horizontal">
+                                        <Input
+                                            placeholder="Add an outline item"
+                                            onChange={(e) => {
+                                                setSoloOutline(e.target.value);
+                                            }}
+                                            className="border border-gray-300 rounded-lg"
+                                        />
+                                        <Button
+                                            onClick={() => generateOneDraft(index)}
+                                            type="primary"
+                                            className="mt-2 bg-blue-500 hover:bg-blue-600"
+                                            loading={loading}
+                                        >
+                                            Add Outline Item
+                                        </Button>
+                                    </Form.Item>
+                                </Form>
+                            </div>
+                        )
+                    })}
                 </div>
             )}
 

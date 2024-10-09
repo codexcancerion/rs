@@ -3,26 +3,15 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, List, Card, message } from 'antd';
 import axios from 'axios';
+import { Title, TitleReqs } from '@/app/lib/interfaces';
 
 const { TextArea } = Input;
 
-interface TitleReqs {
-  id: number;
-  topicDescription: string;
-  researchType: string;
-  context: string;
-  initialObjectives: string
-}
+// to save in database
+// savedTitle
+// titleSuggestions
 
 const TitleMakingPage = () => {
-  const [titleSuggestions, setTitleSuggestions] = useState<string[]>([]);
-  const [customTitle, setCustomTitle] = useState<string>('');
-  const [savedTitle, setSavedTitle] = useState<string>('');  // Added to store the saved title
-  const [doneTitle, setDoneTitle] = useState<boolean>(false);
-  const [doneSuggestion, setDoneSuggestion] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState(null); // To store the analysis result
-  // const [doneAnalysis, setDoneAnalysis] = useState(false);
   const [titleReqs, setTitleReqs] = useState<TitleReqs>({
     id: 0,
     topicDescription: "",
@@ -30,12 +19,19 @@ const TitleMakingPage = () => {
     context: "",
     initialObjectives: ""
   });
+  const [titleSuggestions, setTitleSuggestions] = useState<Title[]>([]);
+  const [customTitle, setCustomTitle] = useState<Title>({
+    id: 99,
+    title: '',
+    analysis: '',
+    titleReqs: titleReqs
+  });
+  const [savedTitle, setSavedTitle] = useState<Title>();  // Added to store the saved title
 
+  const [doneTitle, setDoneTitle] = useState<boolean>(false);
+  const [doneSuggestion, setDoneSuggestion] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
-  // How does zero trust policy work; Successful implementation of zero trust policy; Steps in implementation
-  // Work from anywhere platforms
-  // Literature Review
-  // explore the use of zero trust policy and how to implement it
 
   const generateTitleSuggestions = async () => {
     setLoading(true);
@@ -51,7 +47,21 @@ const TitleMakingPage = () => {
       // Assuming the API returns an array of suggested titles
       console.log(response);
       console.log("SUGGESTIONS: " + response.data.suggestions);
-      setTitleSuggestions(response.data.suggestions);
+
+      // setTitleSuggestions(response.data.suggestions);
+      const suggestions = response.data.suggestions;
+      const tempSuggestion: Title[] = [];
+      suggestions.map((item: string, idx: number) => {
+        tempSuggestion.push({
+          id: idx,
+          title: item,
+          analysis: "",
+          titleReqs: titleReqs
+        })
+      })
+
+      setTitleSuggestions(tempSuggestion);
+
       setDoneSuggestion(true);
     } catch (error) {
       console.error('Error generating title suggestions:', error);
@@ -62,18 +72,33 @@ const TitleMakingPage = () => {
   };
 
 
-  const generateTitleAnalysis = async (title: string) => {
+  const generateTitleAnalysis = async (title: Title, isSavedTitle: boolean) => {
     setLoading(true);
 
     try {
       const response = await axios.post('/api/generateTitleAnalysis', {
-        title: title,
+        title: title.title,
       });
 
       // Assuming the API returns an array of suggested titles
       console.log(response);
       console.log("ANALYSIS: " + response.data.analysis);
-      setAnalysis(response.data.analysis);
+
+      const titleSuggestionsMutation = titleSuggestions;
+
+      isSavedTitle ? setSavedTitle({
+        id: title.id,
+        title: title.title,
+        analysis: response.data.analysis,
+        titleReqs: title.titleReqs,
+      })
+        :
+        titleSuggestionsMutation.map(item => {
+          if (item.id === title.id) item.analysis = response.data.analysis;
+        })
+      setTitleSuggestions(titleSuggestionsMutation);
+
+      // setAnalysis(response.data.analysis);
       // setDoneAnalysis(true);
     } catch (error) {
       console.error('Error generating title analysis:', error);
@@ -83,12 +108,21 @@ const TitleMakingPage = () => {
     }
   };
 
+  const handleCustomTitle = (title: string) => {
+    const newTitle = {
+      id: ++titleSuggestions.length,
+      title: title,
+      analysis: '',
+      titleReqs: titleReqs
+    };
+    setCustomTitle(newTitle);
+    handleAcceptTitle(customTitle || newTitle);
+  }
 
-  // Handler for accepting a title
-  const handleAcceptTitle = (title: string) => {
-    setSavedTitle(title);  // Update saved title state
+  const handleAcceptTitle = (title: Title) => {
+    setSavedTitle(title);
     setDoneTitle(true)
-    message.success(`Title "${title}" accepted!`);
+    message.success(`Title "${title.title}" accepted!`);
   };
 
   return (
@@ -106,36 +140,36 @@ const TitleMakingPage = () => {
         <div className="mb-6 px-8 py-4 bg-white rounded-lg">
           <h3 className="text-xl font-semibold mb-3">Saved Title</h3>
           <TextArea
-            defaultValue={savedTitle}
+            value={savedTitle.title}
             onChange={e => {
-              setSavedTitle(e.target.value);
+              setSavedTitle({ ...savedTitle, title: e.target.value });
             }}
             className="border border-gray-300 rounded-lg"
           />
-          <Button
-            type="primary"
-            className="mt-2 bg-green-500 hover:bg-green-600"
-            onClick={() => generateTitleAnalysis(savedTitle)}
-            loading={loading}>
-            Generate Analysis
-          </Button>
-
-          {analysis && (
+          
+          {/* DISPLAY ANALYSIS IF IT IS PRESENT */}
+          {savedTitle.analysis || savedTitle.analysis !== '' ? (
             <>
-              <h4 className="text-lg font-semibold">Title Analysis</h4>
+              {/* <h4 className="text-lg font-semibold">Title Analysis</h4> */}
               <div className="p-4 bg-gray-100 rounded-lg">
                 <h5 className="font-bold">Analysis:</h5>
-                {/* <pre>{JSON.stringify(analysis, null, 2)}</pre> Display analysis in a formatted way */}
-                <p><pre className='whitespace-pre-line'>{analysis}</pre></p>
+                <p><pre className='whitespace-pre-line'>{savedTitle.analysis}</pre></p>
               </div>
             </>
+          ) : (
+            <Button
+              type="primary"
+              className="mt-2 bg-green-500 hover:bg-green-600"
+              onClick={() => generateTitleAnalysis(savedTitle, true)}
+              loading={loading}>
+              Generate Analysis
+            </Button>
           )}
         </div>
       )}
 
       {/* Title Making Form */}
       {!doneTitle ? (
-
         <Form layout="vertical" className="space-y-6">
           <Form.Item label="Describe Your Research Topic" name="topic">
             <TextArea
@@ -211,8 +245,8 @@ const TitleMakingPage = () => {
         </Button>
       )}
 
-      {/* Title Suggestions Section */}
-      {titleSuggestions.length > 0 && (
+      {/* GENERATION OF TITLE SUGGESTIONS*/}
+      {titleSuggestions.length > 0 && !doneTitle && (
         <div className="mt-8">
           <h3 className="text-xl font-semibold">Suggested Titles</h3>
           <List
@@ -221,13 +255,32 @@ const TitleMakingPage = () => {
             renderItem={title => (
               <List.Item>
                 <Card className="border border-gray-200 rounded-lg shadow-sm">
-                  <p>{title}</p>
+                  <p>{title.title}</p>
                   <Button
                     type="primary"
                     className="mt-2 bg-green-500 hover:bg-green-600"
                     onClick={() => handleAcceptTitle(title)}>
                     Accept
                   </Button>
+
+                  {/* DISPLAY ANALYSIS IF IT IS PRESENT */}
+                  {title.analysis || title.analysis !== '' ? (
+                    <>
+                      {/* <h4 className="text-lg font-semibold">Title Analysis</h4> */}
+                      <div className="p-4 bg-gray-100 rounded-lg">
+                        <h5 className="font-bold">Analysis:</h5>
+                        <p><pre className='whitespace-pre-line'>{title.analysis}</pre></p>
+                      </div>
+                    </>
+                  ) : (
+                    <Button
+                      type="primary"
+                      className="mt-2 bg-green-500 hover:bg-green-600"
+                      onClick={() => generateTitleAnalysis(title, false)}
+                      loading={loading}>
+                      Generate Analysis
+                    </Button>
+                  )}
                 </Card>
               </List.Item>
             )}
@@ -249,8 +302,8 @@ const TitleMakingPage = () => {
                     <Form.Item label="Your custom title" name="customTitle">
                       <Input
                         placeholder="Enter your own title"
-                        value={customTitle}
-                        onChange={e => setCustomTitle(e.target.value)}
+                        value={customTitle?.title}
+                        onChange={e => customTitle.title = e.target.value}
                         className="border border-gray-300 rounded-lg"
                       />
                     </Form.Item>
@@ -279,3 +332,11 @@ const TitleMakingPage = () => {
 };
 
 export default TitleMakingPage;
+
+
+
+
+// How does zero trust policy work; Successful implementation of zero trust policy; Steps in implementation
+// Work from anywhere platforms
+// Literature Review
+// explore the use of zero trust policy and how to implement it

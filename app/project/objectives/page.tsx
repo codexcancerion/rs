@@ -2,15 +2,25 @@
 
 import React, { useState } from 'react';
 import { Form, Input, Button, List, Card, message } from 'antd';
+import { Title, TitleReqs, Question } from '@/app/lib/interfaces';
+
+// to save in database
+// finalObjectives
+// finalQuestions
 
 const { TextArea } = Input;
 
 const ObjectivesPage = () => {
+    const [savedTitle, setSavedTitle] = useState<Title>();
+
     const [objectivesDescription, setObjectivesDescription] = useState<string>('');
+
     const [objectiveSuggestions, setObjectiveSuggestions] = useState<string[]>([]);
     const [finalObjectives, setFinalObjectives] = useState<string[]>([]);
+
     const [questionSuggestions, setQuestionSuggestions] = useState<string[]>([]);
-    const [finalQuestions, setFinalQuestions] = useState<string[]>([]);
+    const [finalQuestions, setFinalQuestions] = useState<Question[]>([]);
+
     const [loadingObjectives, setLoadingObjectives] = useState<boolean>(false);
     const [loadingQuestions, setLoadingQuestions] = useState<boolean>(false);
     // const [doneObjectives, setDoneObjectives] = useState<boolean>(false);
@@ -53,9 +63,29 @@ const ObjectivesPage = () => {
         }, 1000);
     };
 
+    const generateQuestionAnalysis = (index: number) => {
+        const response = "call the axios here"
+        const copyQuestion = finalQuestions;
+        copyQuestion[index].analysis = response;
+        setFinalQuestions(copyQuestion);
+        message.success('Questions analysis was successful!');
+    }
+
+
     // Handler for accepting research questions
     const handleSaveQuestions = () => {
-        setFinalQuestions([...questionSuggestions]);
+        // setFinalQuestions([...questionSuggestions]);
+        const copyQuestions: Question[] = [];
+        questionSuggestions.map(item => {
+            copyQuestions.push({
+                id: "id",
+                question: item,
+                analysis: ""
+            })
+        })
+
+        setFinalQuestions(copyQuestions);
+
         setSavedQuestions(true);
         message.success('Research questions saved successfully!');
     };
@@ -199,14 +229,31 @@ const ObjectivesPage = () => {
                             renderItem={(question, index) => (
                                 <List.Item>
                                     <TextArea
-                                        value={question}
+                                        defaultValue={question.question}
                                         onChange={e => {
                                             const updatedQuestions = [...finalQuestions];
-                                            updatedQuestions[index] = e.target.value;
+                                            updatedQuestions[index].question = e.target.value;
                                             setFinalQuestions(updatedQuestions);
                                         }}
                                         className="border border-gray-300 rounded-lg"
                                     />
+
+                                    {question.analysis || question.analysis !== '' ? (
+                                        <>
+                                            <div className="p-4 bg-gray-100 rounded-lg mb-8 mt-2">
+                                                <h5 className="font-bold">Question Analysis:</h5>
+                                                <pre className='whitespace-pre-line'>{question.analysis}</pre>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <Button
+                                            type="primary"
+                                            onClick={() => generateQuestionAnalysis(index)}
+                                            className="mt-4 bg-green-500 hover:bg-green-600 w-full">
+                                            Generate Analysis
+                                        </Button>
+                                    )}
+
                                 </List.Item>
                             )}
                         />
