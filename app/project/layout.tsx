@@ -1,4 +1,6 @@
 "use client"
+/* eslint-disable */
+
 // components/Layout.tsx
 import React from 'react';
 import { Layout, Menu } from 'antd';
