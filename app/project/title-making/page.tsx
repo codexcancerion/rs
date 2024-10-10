@@ -1,10 +1,12 @@
 'use client';
 /* eslint-disable */
 
-import React, { useState } from 'react';
-import { Form, Input, Button, List, Card, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Form, Input, Button, List, Card, message, Collapse } from 'antd';
 import axios from 'axios';
 import { Title, TitleReqs } from '@/app/lib/interfaces';
+import { useResearchContext } from '@/app/context/ResearchContext';
+import ReactMarkdown from 'react-markdown';
 
 const { TextArea } = Input;
 
@@ -13,6 +15,8 @@ const { TextArea } = Input;
 // titleSuggestions
 
 const TitleMakingPage = () => {
+  const { resTitles, setResTitles } = useResearchContext();
+
   const [titleReqs, setTitleReqs] = useState<TitleReqs>({
     id: 0,
     topicDescription: "",
@@ -27,7 +31,7 @@ const TitleMakingPage = () => {
     analysis: '',
     titleReqs: titleReqs
   });
-  const [savedTitle, setSavedTitle] = useState<Title>();  // Added to store the saved title
+  // const [savedTitle, setSavedTitle] = useState<Title>();  // Added to store the saved title
 
   const [doneTitle, setDoneTitle] = useState<boolean>(false);
   const [doneSuggestion, setDoneSuggestion] = useState<boolean>(false);
@@ -87,12 +91,12 @@ const TitleMakingPage = () => {
 
       const titleSuggestionsMutation = titleSuggestions;
 
-      isSavedTitle ? setSavedTitle({
+      isSavedTitle ? setResTitles([{
         id: title.id,
         title: title.title,
         analysis: response.data.analysis,
         titleReqs: title.titleReqs,
-      })
+      }])
         :
         titleSuggestionsMutation.map(item => {
           if (item.id === title.id) item.analysis = response.data.analysis;
@@ -121,10 +125,28 @@ const TitleMakingPage = () => {
   }
 
   const handleAcceptTitle = (title: Title) => {
-    setSavedTitle(title);
-    setDoneTitle(true)
+    setResTitles([title || {
+      id: 0,
+      title: '',
+      analysis: '',
+      titleReqs: titleReqs
+    }])
+    setDoneTitle(true);
     message.success(`Title "${title.title}" accepted!`);
   };
+
+  // const handleSaveResearchTitle = () => {
+  //   setResTitles([savedTitle || {
+  //     id: 0,
+  //     title: '',
+  //     analysis: '',
+  //     titleReqs: titleReqs
+  //   }, ...resTitles])
+  //   message.success('Successfully saved your title!');
+  // }
+
+
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -137,31 +159,40 @@ const TitleMakingPage = () => {
         <p className="text-blue-500 text-sm mt-2">Step 1: Title Making</p>
       </div>
 
-      {savedTitle && (
-        <div className="mb-6 px-8 py-4 bg-white rounded-lg">
-          <h3 className="text-xl font-semibold mb-3">Saved Title</h3>
+      {resTitles && (
+        <div className="mb-6 bg-white rounded-lg">
+          <h3 className="h1 font-bold text-4xl mt-4">Saved Title</h3>
           <TextArea
-            value={savedTitle.title}
+            value={resTitles[0]?.title}
             onChange={e => {
-              setSavedTitle({ ...savedTitle, title: e.target.value });
+              const temp = resTitles;
+              temp[0].title = e.target.value;
+              // setSavedTitle({ ...savedTitle, title: e.target.value });
+              setResTitles(temp);
             }}
-            className="border border-gray-300 rounded-lg"
+            className="border border-gray-300 rounded-lg mb-2"
           />
-          
+
           {/* DISPLAY ANALYSIS IF IT IS PRESENT */}
-          {savedTitle.analysis || savedTitle.analysis !== '' ? (
+          {resTitles[0].analysis || resTitles[0].analysis !== '' ? (
             <>
-              {/* <h4 className="text-lg font-semibold">Title Analysis</h4> */}
-              <div className="p-4 bg-gray-100 rounded-lg">
+              <Collapse items={[{
+                key: '1',
+                label: 'Question Analysis',
+                children: <ReactMarkdown>{resTitles[0].analysis}</ReactMarkdown>,
+              }]}
+                defaultActiveKey={['0']}
+              />
+              {/* <div className="p-4 bg-gray-100 rounded-lg">
                 <h5 className="font-bold">Analysis:</h5>
-                <p><pre className='whitespace-pre-line'>{savedTitle.analysis}</pre></p>
-              </div>
+                <p><pre className='whitespace-pre-line'>{resTitles[0].analysis}</pre></p>
+              </div> */}
             </>
           ) : (
             <Button
               type="primary"
               className="mt-2 bg-green-500 hover:bg-green-600"
-              onClick={() => generateTitleAnalysis(savedTitle, true)}
+              onClick={() => generateTitleAnalysis(resTitles[0], true)}
               loading={loading}>
               Generate Analysis
             </Button>
@@ -170,8 +201,9 @@ const TitleMakingPage = () => {
       )}
 
       {/* Title Making Form */}
-      {!doneTitle ? (
+      {!doneTitle || resTitles[0].title === "" ? (
         <Form layout="vertical" className="space-y-6">
+          <h3 className="h1 font-bold text-4xl mt-4">Generate Title</h3>
           <Form.Item label="Describe Your Research Topic" name="topic">
             <TextArea
               rows={4}
@@ -323,11 +355,13 @@ const TitleMakingPage = () => {
       )}
 
       {/* Save and Continue Button */}
-      <Button
+      {/* <Button
         type="primary"
-        className="bg-green-500 hover:bg-green-600 w-full mt-10">
+        className="bg-green-500 hover:bg-green-600 w-full mt-10"
+        onClick={handleSaveResearchTitle}
+        disabled={!doneTitle}>
         Save and Continue
-      </Button>
+      </Button> */}
     </div>
   );
 };

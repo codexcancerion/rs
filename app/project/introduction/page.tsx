@@ -11,15 +11,10 @@ const { TextArea } = Input;
 // introductionDrafts
 
 const IntroductionPage = () => {
-    // const [outlineItems, setOutlineItems] = useState<string[]>([]);
     const [soloOutline, setSoloOutline] = useState<string>('');
     const [newOutlineItem, setNewOutlineItem] = useState<string>('');
 
     const [introductionDrafts, setIntroductionDrafts] = useState<Outline[]>([]);
-    // let introductionDrafts: Outline[] = [];
-    // function setIntroductionDrafts(draft: Outline[]){
-    //     introductionDrafts = draft;
-    // }
 
     const [loading, setLoading] = useState(false);
     const [doneGeneratingDraft, setDoneGeneratingDraft] = useState(false);
@@ -38,8 +33,7 @@ const IntroductionPage = () => {
             };
 
             console.log(newDraft);
-            // introductionDrafts.length === 0 ? setIntroductionDrafts([newDraft]) : setIntroductionDrafts([...introductionDrafts, newDraft]);
-
+            
             introductionDrafts.push(newDraft);
             setNewOutlineItem('');
             console.log(introductionDrafts)
@@ -107,8 +101,11 @@ const IntroductionPage = () => {
     };
 
     const handleRemoveDraft = (index: number) => {
-        const tempDraft = introductionDrafts;
-        tempDraft.splice(index, 1);
+        // const tempDraft = introductionDrafts;
+        // tempDraft.splice(index, 1);
+        // setIntroductionDrafts(tempDraft);
+        
+        const tempDraft = introductionDrafts.filter((_, idx) => idx !== index);
         setIntroductionDrafts(tempDraft);
 
         console.log("REMOVE DRAFT: " + introductionDrafts)

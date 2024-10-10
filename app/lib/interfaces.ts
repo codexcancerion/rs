@@ -26,4 +26,10 @@ interface Question {
     analysis: string;
 }
 
-export type {Title, TitleReqs, Outline, Question};
+interface Objective {
+    id: string;
+    objective: string;
+    analysis: string;
+}
+
+export type {Title, TitleReqs, Outline, Question, Objective};
