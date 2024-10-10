@@ -1,5 +1,5 @@
 import React, { createContext, useState, ReactNode } from 'react';
-import { Title, TitleReqs, Outline, Question, Objective } from '@/app/lib/interfaces';
+import { Title, Outline, Question, Objective } from '@/app/lib/interfaces';
 
 interface ResearchContextProps {
     resTitles: Title[];
