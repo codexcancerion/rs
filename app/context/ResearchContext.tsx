@@ -12,12 +12,13 @@ interface ResearchContextProps {
     setResObjectives: React.Dispatch<React.SetStateAction<Objective[]>>;
 }
 
+
 const ResearchContext = createContext<ResearchContextProps | undefined>(undefined);
 
 export const ResearchProvider = ({ children }: { children: ReactNode }) => {
     const [resTitles, setResTitles] = useState<Title[]>([{
         id: 0,
-        title: "",
+        title: "The Impact of E-learning on Student Performance During the COVID-19 Pandemic",
         analysis: "",
         titleReqs: {
             id: 0,
@@ -28,8 +29,38 @@ export const ResearchProvider = ({ children }: { children: ReactNode }) => {
         }
     }]);
     const [resIntroductionOutlines, setResIntroductionOutlines] = useState<Outline[]>([]);
-    const [resQuestions, setResQuestions] = useState<Question[]>([]);
-    const [resObjectives, setResObjectives] = useState<Objective[]>([]);
+    const [resQuestions, setResQuestions] = useState<Question[]>([{
+        id: "0",
+        question: "What is the level of effectiveness of e-learning platforms during the pandemic?",
+        analysis: ""
+
+    },{
+        id: "0",
+        question: "How does student engagement in e-learning correlate with academic performance?",
+        analysis: ""
+
+    },{
+        id: "0",
+        question: "What challenges do students face in accessing e-learning resources?",
+        analysis: ""
+
+    },]);
+    const [resObjectives, setResObjectives] = useState<Objective[]>([{
+        id: "0",
+        objective: "To evaluate the effectiveness of e-learning platforms during the pandemic.",
+        analysis: ""
+
+    },{
+        id: "0",
+        objective: "To analyze the correlation between e-learning engagement and academic performance.",
+        analysis: ""
+
+    },{
+        id: "0",
+        objective: "To assess the challenges faced by students in accessing e-learning resources.",
+        analysis: ""
+
+    }]);
 
     return (
         <ResearchContext.Provider value={{ resTitles, resIntroductionOutlines, resQuestions, resObjectives, setResTitles, setResIntroductionOutlines, setResQuestions, setResObjectives }}>

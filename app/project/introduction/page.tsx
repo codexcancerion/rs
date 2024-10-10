@@ -4,6 +4,9 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, List, Card, message } from 'antd';
 import { Outline } from '@/app/lib/interfaces';
+import { useResearchContext } from '@/app/context/ResearchContext';
+// import { getResIntroductionOutlinesDescriptions, getResIntroductionOutlinesPrompts, getResObjectivesString, getResQuestionsString } from '@/app/lib/getters';
+import axios from 'axios';
 
 const { TextArea } = Input;
 
@@ -11,105 +14,205 @@ const { TextArea } = Input;
 // introductionDrafts
 
 const IntroductionPage = () => {
+    const { resIntroductionOutlines, setResIntroductionOutlines } = useResearchContext();
+    const { resTitles, setResTitles } = useResearchContext();
+    const { resObjectives, resQuestions } = useResearchContext();
+
     const [soloOutline, setSoloOutline] = useState<string>('');
     const [newOutlineItem, setNewOutlineItem] = useState<string>('');
-
-    const [introductionDrafts, setIntroductionDrafts] = useState<Outline[]>([]);
 
     const [loading, setLoading] = useState(false);
     const [doneGeneratingDraft, setDoneGeneratingDraft] = useState(false);
 
+
     useEffect(() => {
-        console.log(introductionDrafts)
-    }, introductionDrafts)
+        console.log(resIntroductionOutlines)
+    }, resIntroductionOutlines)
+
 
     const addOutlineItem = () => {
         if (newOutlineItem.trim() !== '') {
             const newDraft = {
-                id: introductionDrafts.length + 1,
+                id: resIntroductionOutlines.length + 1,
                 description: [""],
                 prompt: newOutlineItem,
                 referenceLinks: [""]
             };
 
             console.log(newDraft);
-            
-            introductionDrafts.push(newDraft);
+
+            resIntroductionOutlines.push(newDraft);
             setNewOutlineItem('');
-            console.log(introductionDrafts)
+            console.log(resIntroductionOutlines)
         } else {
             message.warning("Outline item can't be empty");
         }
     };
 
+
+
     const removeOutlineItem = (index: number) => {
-        const updatedItems = introductionDrafts.filter((_, idx) => idx !== index);
-        setIntroductionDrafts(updatedItems);
+        const updatedItems = resIntroductionOutlines.filter((_, idx) => idx !== index);
+        setResIntroductionOutlines(updatedItems);
     };
 
-    const generateIntroductionDrafts = () => {
+
+
+    const generateIntroductionDrafts = async () => {
         setLoading(true);
+        const introductionDraftsMutation = resIntroductionOutlines;
 
-        const introductionDraftsMutation = introductionDrafts
+        const data = {
+            title: resTitles[0].title,
+            objectives: getResObjectivesString(),
+            questions: getResQuestionsString(),
+            outlines: getResIntroductionOutlinesPrompts(),
+        }
 
-        introductionDrafts.map((item, index) => {
-            const newOutlineDraft = {
-                description: ["call axios here"],
-                referenceLinks: ["sample.com"]
-            };
+        try {
+            console.log("data: " + data)
+            const response = await axios.post('/api/generateIntroductionDraft', data);
 
-            introductionDraftsMutation[index].description = newOutlineDraft.description;
-            introductionDraftsMutation[index].referenceLinks = newOutlineDraft.referenceLinks;
-        })
+            const newDraft: Outline[] = [];
 
-        setIntroductionDrafts(introductionDraftsMutation);
-        setDoneGeneratingDraft(true);
+            // JSON.stringify(response)
+            // console.log("generateDraft: " + JSON.stringify(response))
+            const rawDraft = response.data.introduction_drafts.introduction_drafts;
+            // console.log(`rawDraft: ${JSON.stringify(rawDraft)}`)
+            // introduction_drafts: {description: ["outline1"], referenceLinks: ["link.com"]}
+            // console.log("mutation: "+JSON.stringify(introductionDraftsMutation))
+            console.log("mutation length: " + introductionDraftsMutation.length)
+            console.log("rawDraft length: " + rawDraft.length)
+            for (let i = 0; i < introductionDraftsMutation.length; i++) {
+                const item = rawDraft[i];
+                const temp: Outline = {
+                    id: introductionDraftsMutation[i].id,
+                    prompt: introductionDraftsMutation[i].prompt,
+                    description: item.description,
+                    referenceLinks: item.referenceLinks
+                }
+                newDraft.push(temp);
+                console.log(JSON.stringify(newDraft))
+
+            }
+            // rawDraft.map((item: any, index: number) => {
+            //     const temp: Outline = {
+            //         id: introductionDraftsMutation[index].id,
+            //         prompt: introductionDraftsMutation[index].prompt,
+            //         description: item.description,
+            //         referenceLinks: item.referenceLinks
+            //     }
+            //     newDraft.push(temp);
+            //     console.log(JSON.stringify(newDraft))
+            //     // introductionDraftsMutation[index].description = item.description;
+            //     // introductionDraftsMutation[index].referenceLinks = item.referenceLinks;
+            // })
+
+            setResIntroductionOutlines(newDraft);
+            console.log(resIntroductionOutlines);
+            setDoneGeneratingDraft(true);
+        } catch (error) {
+            console.error('Error generating drafts:', error);
+            message.error("Problem generating drafts, try again!")
+        }
+
         setLoading(false);
     };
 
 
-    const generateOneDraft = (i: number) => {
-        setLoading(true);
+    // const generateDraft = async (prompt: string) => {  
+    // }
 
-        // Simulate API request for generating introduction drafts based on title, objectives, and outline.
-        const result = {
-            description: ["inserted call axios here", "inserted call axios here"],
-            referenceLinks: ["inserted.com"]
-        };
-
-        const oneDraft = {
-            id: i + 1,
-            prompt: soloOutline,
-            description: result.description,
-            referenceLinks: result.referenceLinks
+    const generateDraftAndInsert = async (prompt: string, index: number) => {
+        const data = {
+            title: resTitles[0].title,
+            objectives: getResObjectivesString(),
+            questions: getResQuestionsString(),
+            introDraft: getResIntroductionOutlinesDescriptions(),
+            outline: prompt,
         }
 
-        const draftUpdate = [
-            ...introductionDrafts.slice(0, i + 1),
-            oneDraft,
-            ...introductionDrafts.slice(i + 1),
-        ];
+        try {
+            const response = await axios.post('/api/generateSingleIntroductionDraft', data);
 
-        console.log(draftUpdate);
+            console.log("generateDraftAndInset: " + response.data)
+            const rawDraft = response.data.introduction_drafts.introduction_drafts;
+            // introduction_drafts: {description: ["outline1"], referenceLinks: ["link.com"]}
+            const newDraft: Outline = {
+                id: 0,
+                description: rawDraft.description,
+                prompt: prompt,
+                referenceLinks: rawDraft.referenceLinks
+            };
 
-        setIntroductionDrafts(draftUpdate);
+            // INSERTION CODE
+            const draftUpdate = [
+                ...resIntroductionOutlines.slice(0, index + 1),
+                newDraft,
+                ...resIntroductionOutlines.slice(index + 1),
+            ];
+            console.log(draftUpdate);
+            setResIntroductionOutlines(draftUpdate);
 
-        console.log(introductionDrafts);
+        } catch (error) {
+            console.error('Error generating drafts:', error);
+            message.error("Problem generating drafts, try again!")
+        }
+    }
 
+    const generateOneDraft = async (i: number) => {
+        setLoading(true);
+        await generateDraftAndInsert(soloOutline, i);
+        console.log(resIntroductionOutlines);
         setDoneGeneratingDraft(true);
         setLoading(false);
     };
 
     const handleRemoveDraft = (index: number) => {
-        // const tempDraft = introductionDrafts;
-        // tempDraft.splice(index, 1);
-        // setIntroductionDrafts(tempDraft);
-        
-        const tempDraft = introductionDrafts.filter((_, idx) => idx !== index);
-        setIntroductionDrafts(tempDraft);
 
-        console.log("REMOVE DRAFT: " + introductionDrafts)
+        const tempDraft = resIntroductionOutlines.filter((_, idx) => idx !== index);
+        setResIntroductionOutlines(tempDraft);
+
+        console.log("REMOVE DRAFT: " + resIntroductionOutlines)
     }
+
+    const getResQuestionsString = () => {
+        // const { resQuestions} = useResearchContext();
+        const temp: string[] = [];
+        resQuestions.map((item) => {
+            temp.push(item.question);
+        })
+        return temp;
+    }
+
+    const getResObjectivesString = () => {
+        // const { resObjectives } = useResearchContext();
+        const temp: string[] = [];
+        resObjectives.map((item) => {
+            temp.push(item.objective);
+        })
+        return temp;
+    }
+
+    const getResIntroductionOutlinesPrompts = () => {
+        // const { resIntroductionOutlines } = useResearchContext();
+        const temp: string[] = [];
+        resIntroductionOutlines.map((item) => {
+            temp.push(item.prompt);
+        })
+        return temp;
+    }
+
+    const getResIntroductionOutlinesDescriptions = () => {
+        // const { resIntroductionOutlines } = useResearchContext();
+        const temp: string[] = [];
+        resIntroductionOutlines.map((item) => {
+            temp.push(item.description.join('\n'));
+        })
+        return temp;
+    }
+
+
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -122,7 +225,7 @@ const IntroductionPage = () => {
             </div>
 
             {/* Input for Research Description */}
-            {!doneGeneratingDraft || introductionDrafts.length === 0 ? (
+            {!doneGeneratingDraft ? (
                 <Form layout="vertical" className="space-y-6">
                     <Form.Item label="Research Description">
                         <TextArea
@@ -146,10 +249,10 @@ const IntroductionPage = () => {
                     </Form.Item>
 
                     {/* Display the outline items */}
-                    {introductionDrafts.length > 0 && (
+                    {resIntroductionOutlines.length > 0 && (
                         <List
                             className="mt-4"
-                            dataSource={introductionDrafts.map((item, index) => ({
+                            dataSource={resIntroductionOutlines.map((item, index) => ({
                                 key: index,
                                 content: (
                                     <Card className="border border-gray-300 rounded-lg w-full">
@@ -189,7 +292,7 @@ const IntroductionPage = () => {
                 <Button
                     type="primary"
                     onClick={() => {
-                        setIntroductionDrafts([]);
+                        setResIntroductionOutlines([]);
                         setDoneGeneratingDraft(false);
                     }}
                     loading={loading}
@@ -200,16 +303,16 @@ const IntroductionPage = () => {
             )}
 
             {/* Display Generated Drafts */}
-            {introductionDrafts.length > 0 && doneGeneratingDraft && (
+            {resIntroductionOutlines.length > 0 && doneGeneratingDraft && (
                 <div className="mt-8">
                     <h3 className="text-xl font-semibold">Generated Introduction Drafts</h3>
-                    {introductionDrafts.map((draft, index) => {
+                    {resIntroductionOutlines.map((draft, index) => {
                         return (
                             <div key={index} className="flex flex-col w-full">
                                 <Card className="border border-gray-300 rounded-lg shadow-sm w-full mb-4">
                                     <p className="font-grey-500">Outline: {draft.prompt}</p>
                                     {draft.description.map((desc, idx) => {
-                                        return (                                            
+                                        return (
                                             <TextArea
                                                 key={idx}
                                                 rows={3}
@@ -218,15 +321,15 @@ const IntroductionPage = () => {
                                             />
                                         )
                                     })}
-                                    
+
                                     <Button
-                                            onClick={() => handleRemoveDraft(index)}
-                                            type="primary"
-                                            className="mt-2 bg-red-500 hover:bg-red-600"
-                                            loading={loading}
-                                        >
-                                            Remove
-                                        </Button>
+                                        onClick={() => handleRemoveDraft(index)}
+                                        type="primary"
+                                        className="mt-2 bg-red-500 hover:bg-red-600"
+                                        loading={loading}
+                                    >
+                                        Remove
+                                    </Button>
                                 </Card>
                                 <Form layout="horizontal" className="space-y-6">
                                     <Form.Item label="Insert here" layout="horizontal">

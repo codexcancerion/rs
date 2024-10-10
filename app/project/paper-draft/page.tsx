@@ -4,7 +4,7 @@ import React from 'react';
 import { useResearchContext } from '@/app/context/ResearchContext';
 
 const PaperDraft = () => {
-  const { resTitles, resObjectives, resQuestions } = useResearchContext();
+  const { resTitles, resObjectives, resQuestions, resIntroductionOutlines } = useResearchContext();
 
   return (
     // <div className="min-h-screen bg-gray-100 p-8">
@@ -47,6 +47,21 @@ const PaperDraft = () => {
               <div key={index} className="mb-4 p-4 border rounded-md bg-gray-50">
                 <p className="text-gray-700"><strong>{index+1}. </strong> {question.question}</p>
                 {/* <p className="text-gray-500 mt-2"><strong>Analysis:</strong> {question.analysis}</p> */}
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No questions available.</p>
+          )}
+        </section>
+
+
+        {/* Display Introduction */}
+        <section>
+          <h2 className="text-2xl font-semibold text-gray-700 mb-4">Introduction</h2>
+          {resIntroductionOutlines.length > 0 ? (
+            resIntroductionOutlines.map((outline, index) => (
+              <div key={index} className="mb-4 p-4 border rounded-md bg-gray-50">
+                <p className="text-gray-700">{outline.description.join("\n")}</p>
               </div>
             ))
           ) : (
