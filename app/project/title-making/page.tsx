@@ -179,7 +179,7 @@ const TitleMakingPage = () => {
               <Collapse items={[{
                 key: '1',
                 label: 'Question Analysis',
-                children: <ReactMarkdown>{resTitles[0].analysis}</ReactMarkdown>,
+                children: <ReactMarkdown className="prose">{resTitles[0].analysis}</ReactMarkdown>,
               }]}
                 defaultActiveKey={['0']}
               />

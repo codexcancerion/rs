@@ -14,10 +14,10 @@ const ProjectPage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       {/* Main content area */}
-        <Content style={{ padding: '20px' }}>
-          <h1 className="text-2xl font-semibold mb-4">Research Project Steps</h1>
+        <div className='bg-white text-center p-10'>
+          <h1 className="text-4xl font-semibold mb-4">Your Research Project</h1>
           <p>Select a step from the sidebar to begin working on your research project.</p>
-        </Content>
+        </div>
     </Layout>
   );
 };
