@@ -4,7 +4,6 @@ import React from 'react';
 import { Layout } from 'antd';
 // import { useRouter } from 'next/navigation';
 
-const { Content } = Layout;
 
 
 const ProjectPage: React.FC = () => {
